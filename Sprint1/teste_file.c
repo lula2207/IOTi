@@ -1,41 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 
 char* open_file(char *local);
 
-void char_to_int(char *str, short *sinal);
+void char_to_int(char *, short *sinal);
+
+short number_points(char* texto);
+
+short valueRMS(short *sinal);
 
 int main() {
     char* arquivo;
-    char* output;
-    int i = 1, sinal;
-    char *token;
-   
+    char* texto;
+    char *token, *aux;
+    short valor;
 
-    arquivo = "C:/Users/joao.lula/Documents/IoTI/Sprint1/sinal.txt";
+    arquivo = "C:/Users/joao.lula/Documents/IOTi/Sprint1/sinal.txt";
 
-    output = open_file(arquivo);
+    texto = open_file(arquivo);
+    aux = open_file(arquivo);
 
-    printf(output);
+    valor = number_points(aux);
 
-    printf("oi");
-    token = strtok(output, "\n");
-    sinal = atoi(token);
-    
-    while(token != NULL){
-        token = strtok(NULL, "\n");
-        sinal = atoi(token);
-        i++;
-        printf("\n%d",sinal);
+    short sinal[valor];
 
-    }
+    char_to_int(texto,sinal);
 
     
-    printf("\n%d",sinal);
 
-    printf("\nFim89");
+    short RMS = valueRMS(sinal);
+
+    printf("Valor RMS:%d",RMS);
+
+    printf("\nFim1");
+    
 
     return 0;
 }
@@ -49,7 +50,7 @@ char * open_file(char *local){
     file = fopen(local, "r");
 
     if(file == NULL){
-        return "oi";
+        return "nulo";
     }
     
     fseek(file, 0L, SEEK_END);
@@ -58,7 +59,7 @@ char * open_file(char *local){
     
     text = (char*)calloc(numbytes, sizeof(char));	
     if(text == NULL)
-        return "oi";
+        return "nula";
 
     fread(text, sizeof(char), numbytes, file);
     fclose(file);
@@ -66,3 +67,68 @@ char * open_file(char *local){
     return text;
 }
 
+short number_points(char* texto){
+    char* token; 
+    short i=1; 
+
+    token = strtok(texto,"\n");
+    while(token!=NULL){
+        token = strtok(NULL,"\n");
+        i++;
+    }
+
+    return i;
+}
+
+void  char_to_int(char *texto, short *sinal){
+
+    char* token; 
+    short i=1; 
+
+    token = strtok(texto,"\n");
+    while(token!=NULL){
+        sinal[i-1] = atoi(token);
+        token = strtok(NULL,"\n");
+        i++;
+        
+    }
+}
+
+short valueRMS(short* sinal ){
+
+    // calculo do periodo 
+
+    short T, aux1, aux2 = 1, i=1;
+    int ciclo = 1;
+
+   
+    // considerando que qualquer ponto, retirando a crista e o vale, são 3 vezes vistos em 1 ciclo.  
+    while(ciclo == 1){
+        aux1 = sinal[1];
+        i++;
+
+        if(aux1 == sinal[i]){
+            aux2++;
+        }
+
+        if(aux2 == 3)
+        {
+            ciclo = 0;
+        }
+    }
+    T = i - 1; 
+
+    double soma_aux = 0; 
+    short rms;
+
+    for (short j = 0; j<T;j++)
+        soma_aux+=pow(sinal[j],2); 
+    
+    
+    rms = (short)sqrt(soma_aux/T);
+
+
+
+return rms;
+
+}
